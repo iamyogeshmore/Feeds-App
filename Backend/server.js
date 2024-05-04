@@ -8,11 +8,12 @@ const app = express();
 const port = 4000;
 app.use(cors());
 
+// --------------- Connect to MySQL ----------------
 const connection = mysql.createConnection({
   host: process.env.DB_HOST,
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
-  database: process.env.DB_DATABASE,
+  database: process.env.DB_DATABASE
 });
 
 connection.connect((err) => {
@@ -25,6 +26,7 @@ connection.connect((err) => {
 
 app.use(bodyParser.json());
 
+// --------------- Register user ----------------
 app.post("/api/register", (req, res) => {
   const { username, password, email, mobileNumber, role } = req.body;
   const sql =
@@ -44,6 +46,7 @@ app.post("/api/register", (req, res) => {
   );
 });
 
+// --------------- Login user ----------------
 app.post("/api/login", (req, res) => {
   const { username, password } = req.body;
   const sql =
@@ -56,7 +59,6 @@ app.post("/api/login", (req, res) => {
     }
     if (result.length > 0) {
       const user = result[0];
-      // Include the user role in the response
       res
         .status(200)
         .json({ userId: user.id, username: user.username, role: user.role });
@@ -67,10 +69,12 @@ app.post("/api/login", (req, res) => {
   });
 });
 
+// --------------- Logout user ----------------
 app.post("/api/logout", (req, res) => {
   res.status(200).send("Logout successful");
 });
 
+// --------------- Create post ----------------
 app.post("/api/posts", (req, res) => {
   const { userId, text } = req.body;
   const sql = "INSERT INTO feed (user_id, text) VALUES (?, ?)";
@@ -85,6 +89,7 @@ app.post("/api/posts", (req, res) => {
   });
 });
 
+// --------------- Get posts of a specific user ----------------
 app.get("/api/posts/:userId", (req, res) => {
   const userId = req.params.userId;
   const sql = "SELECT * FROM feed WHERE user_id = ?";
@@ -99,6 +104,7 @@ app.get("/api/posts/:userId", (req, res) => {
   });
 });
 
+// --------------- Delete post ----------------
 app.delete("/api/posts/:postId", (req, res) => {
   const postId = req.params.postId;
 
@@ -119,6 +125,8 @@ app.delete("/api/posts/:postId", (req, res) => {
     res.status(200).send("Post deleted successfully");
   });
 });
+
+// --------------- Get all posts ----------------
 app.get("/api/posts", (req, res) => {
   const { userId, role } = req.query;
 
@@ -144,6 +152,7 @@ app.get("/api/posts", (req, res) => {
   });
 });
 
+//--------------- Start server ----------------
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
